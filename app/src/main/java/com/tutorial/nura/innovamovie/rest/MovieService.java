@@ -10,6 +10,6 @@ import retrofit2.http.GET;
 public interface MovieService {
 
     @GET("3/movie/popular")
-    Single<List<Movie>> getPopularMovies();
+    Single<Movie> getPopularMovies();
 
 }
