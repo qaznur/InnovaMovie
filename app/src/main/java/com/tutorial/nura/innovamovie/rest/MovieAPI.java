@@ -1,7 +1,6 @@
 package com.tutorial.nura.innovamovie.rest;
 
 import com.tutorial.nura.innovamovie.BuildConfig;
-import com.tutorial.nura.innovamovie.pojo.Movie;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -13,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MovieAPI {
 
-    public static MovieService service;
+    private static MovieService service;
 
     private static Retrofit getRetrofit() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -33,14 +32,14 @@ public class MovieAPI {
 
 
         return new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org")
+                .baseUrl("https://api.themoviedb.org/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client).build();
     }
 
     public static MovieService getService() {
-        if(service == null) {
+        if (service == null) {
             service = getRetrofit().create(MovieService.class);
         }
         return service;

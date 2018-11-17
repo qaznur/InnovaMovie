@@ -34,6 +34,7 @@ public class MoviesViewModel extends ViewModel {
                     @Override
                     public void onSuccess(List<Movie> movies) {
                         MoviesViewModel.this.movies.postValue(movies);
+                        System.out.println("### movies: " + movies.toString());
                     }
 
                     @Override
