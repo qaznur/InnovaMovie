@@ -1,62 +1,46 @@
 package com.tutorial.nura.innovamovie;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 
-import com.tutorial.nura.innovamovie.adapters.RecyclerMovieAdapter;
-import com.tutorial.nura.innovamovie.pojo.Movie;
-import com.tutorial.nura.innovamovie.rest.MovieAPI;
-import com.tutorial.nura.innovamovie.viewmodel.MoviesViewModel;
-
-import java.util.List;
-
+import com.tutorial.nura.innovamovie.fragments.MovieListFragment;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity {
-
-    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        MoviesViewModel moviesViewModel = ViewModelProviders.of(this).get(MoviesViewModel.class);
-//        moviesViewModel.getMovies().observe(this, movies -> {
-//            if (movies == null) {
-//                moviesViewModel.loadMovies();
-//                System.out.println("### movie is null");
-//                return;
-//            }
-//            System.out.println("### movie is not null");
-//
-//            //3242
-//
-//        });
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        MovieAPI.getService().getPopularMovies()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new DisposableSingleObserver<Movie>() {
-                    @Override
-                    public void onSuccess(Movie movie) {
-                        System.out.println("result: " + movie.toString());
-                        RecyclerMovieAdapter adapter = new RecyclerMovieAdapter(movie.getMovieList());
-                        recyclerView.setAdapter(adapter);
-                    }
+        changeFragment(new MovieListFragment(), false);
+    }
 
-                    @Override
-                    public void onError(Throwable e) {
+    public void changeFragment(Fragment fragment, boolean addToBackStack) {
+        String tag = fragment.getClass().getName();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment, tag);
+        if (addToBackStack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commit();
+    }
 
-                    }
-                });
+    public void setTitle(String title) {
+        getSupportActionBar().setTitle(title);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home){
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
