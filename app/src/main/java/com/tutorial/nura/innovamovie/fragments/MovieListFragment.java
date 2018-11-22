@@ -167,8 +167,7 @@ public class MovieListFragment extends Fragment {
                         .subscribe(new DisposableSingleObserver<Movie>() {
                             @Override
                             public void onSuccess(Movie movie) {
-                                adapter.addMovie(movie.getMovieList());
-                                System.out.println("result: " + movie.toString());
+                                adapter.updateMovie(movie.getMovieList());
                             }
 
                             @Override
