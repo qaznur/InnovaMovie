@@ -1,6 +1,7 @@
 package com.tutorial.nura.innovamovie.fragments;
 
 import android.app.ProgressDialog;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -8,7 +9,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.tutorial.nura.innovamovie.MainActivity;
@@ -17,7 +17,6 @@ import com.tutorial.nura.innovamovie.adapters.RecyclerMovieAdapter;
 import com.tutorial.nura.innovamovie.pojo.Movie;
 import com.tutorial.nura.innovamovie.rest.MovieAPI;
 import com.tutorial.nura.innovamovie.utils.ConnectionUtil;
-import com.tutorial.nura.innovamovie.viewmodel.MoviesViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +26,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.ListFragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -46,7 +42,14 @@ public class MovieListFragment extends Fragment {
 
     private List<Movie.MovieItem> movies = new ArrayList<>();
     private RecyclerMovieAdapter adapter;
+    private LinearLayoutManager layoutManager;
+
     private ProgressDialog progressDialog;
+
+    private boolean isLastPage = false;
+    private boolean isLoading = false;
+    private static final int MAX_PAGE = 10;
+    private int pageCount = 1;
 
     @Nullable
     @Override
@@ -61,13 +64,40 @@ public class MovieListFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
         ((MainActivity) getActivity()).setTitle(("Список популярных фильмов"));
+        setHasOptionsMenu(true);
+
 
         RecyclerView recyclerView = getView().findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            layoutManager = new GridLayoutManager(getContext(), 2);
+        } else {
+            layoutManager = new LinearLayoutManager(getContext());
+        }
+
+        recyclerView.setLayoutManager(layoutManager);
         adapter = new RecyclerMovieAdapter(getActivity(), movies);
-        MovieAPI.getService();
         recyclerView.setAdapter(adapter);
+
+        loadMovie(pageCount);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+
+                if (lastVisibleItemPosition == adapter.getItemCount() - 1) {
+                    if (!isLoading && !isLastPage) {
+                        isLoading = true;
+                        loadMovie(++pageCount);
+                    }
+                }
+            }
+        });
 
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setIndeterminate(true);
@@ -82,16 +112,25 @@ public class MovieListFragment extends Fragment {
 //            }
 //        });
 
-        if(ConnectionUtil.hasConnection(getContext())) {
-            MovieAPI.getService().getPopularMovies()
+    }
+
+    private void loadMovie(int page) {
+        if (ConnectionUtil.hasConnection(getContext())) {
+            MovieAPI.getService().getPopularMovies(page)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new DisposableSingleObserver<Movie>() {
                         @Override
                         public void onSuccess(Movie movie) {
-                            adapter.updateList(movie.getMovieList());
-                            System.out.println("result: " + movie.toString());
+                            adapter.addMovie(movie.getMovieList());
+
+                            isLoading = false;
+                            isLastPage = page == MAX_PAGE;
+
                             progressDialog.dismiss();
+                            if (getContext() != null) {
+                                Toast.makeText(getContext(), page + " page is loaded", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                         @Override
@@ -128,7 +167,7 @@ public class MovieListFragment extends Fragment {
                         .subscribe(new DisposableSingleObserver<Movie>() {
                             @Override
                             public void onSuccess(Movie movie) {
-                                adapter.updateList(movie.getMovieList());
+                                adapter.addMovie(movie.getMovieList());
                                 System.out.println("result: " + movie.toString());
                             }
 

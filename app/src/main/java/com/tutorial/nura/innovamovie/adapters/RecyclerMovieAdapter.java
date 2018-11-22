@@ -14,6 +14,7 @@ import com.tutorial.nura.innovamovie.fragments.MovieDetailFragment;
 import com.tutorial.nura.innovamovie.fragments.MovieListFragment;
 import com.tutorial.nura.innovamovie.pojo.Movie;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -24,7 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
  */
 public class RecyclerMovieAdapter extends RecyclerView.Adapter<RecyclerMovieAdapter.MovieViewHolder> {
 
-    private List<Movie.MovieItem> movies;
+    private List<Movie.MovieItem> movies = new ArrayList<>();
     private Activity activity;
 
     public RecyclerMovieAdapter(Activity activity, List<Movie.MovieItem> movies) {
@@ -48,9 +49,9 @@ public class RecyclerMovieAdapter extends RecyclerView.Adapter<RecyclerMovieAdap
         holder.movieId.setText(String.valueOf(item.getId()));
     }
 
-    public void updateList(List<Movie.MovieItem> newList) {
-        movies.clear();
-        movies = newList;
+    public void addMovie(List<Movie.MovieItem> list) {
+        movies.addAll(list);
+//        movies = list;
         notifyDataSetChanged();
     }
 

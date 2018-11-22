@@ -12,7 +12,7 @@ import retrofit2.http.Query;
 public interface MovieService {
 
     @GET("3/movie/popular")
-    Single<Movie> getPopularMovies();
+    Single<Movie> getPopularMovies(@Query("page") int page);
 
     @GET("3/search/movie")
     Single<Movie> searchMovie(@Query("query") String text);

@@ -24,24 +24,24 @@ public class MoviesViewModel extends ViewModel {
         return movies;
     }
 
-    @SuppressLint("CheckResult")
-    public void loadMovies() {
-        DisposableSingleObserver<Movie> disposableSingleObserver = MovieAPI.getService().getPopularMovies()
-                .subscribeOn(Schedulers.io())
-                .subscribeWith(new DisposableSingleObserver<Movie>() {
-                    @Override
-                    public void onSuccess(Movie movies) {
-                        MoviesViewModel.this.movies.postValue(movies);
-                        System.out.println("### movies: " + movies.toString());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        MoviesViewModel.this.moviesError.postValue(e.getLocalizedMessage());
-                    }
-                });
-
-//        disposables.add(disposableSingleObserver);
-    }
+//    @SuppressLint("CheckResult")
+//    public void loadMovies() {
+//        DisposableSingleObserver<Movie> disposableSingleObserver = MovieAPI.getService().getPopularMovies()
+//                .subscribeOn(Schedulers.io())
+//                .subscribeWith(new DisposableSingleObserver<Movie>() {
+//                    @Override
+//                    public void onSuccess(Movie movies) {
+//                        MoviesViewModel.this.movies.postValue(movies);
+//                        System.out.println("### movies: " + movies.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        MoviesViewModel.this.moviesError.postValue(e.getLocalizedMessage());
+//                    }
+//                });
+//
+////        disposables.add(disposableSingleObserver);
+//    }
 
 }

@@ -127,6 +127,7 @@ public class MovieDetailFragment extends Fragment {
     private void loadInfo(String movieId) {
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Загружается...");
         progressDialog.show();
 
         MovieAPI.getService().getDetailInfo(movieId)
